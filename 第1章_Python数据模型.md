@@ -80,7 +80,7 @@ class Vector:
 
 ## 特殊方法一览
 
-- 跟运算符无关的特殊方法
+### 跟运算符无关的特殊方法
 
 | 类别                    | 方法名                                                       |
 | ----------------------- | ------------------------------------------------------------ |
@@ -93,15 +93,7 @@ class Vector:
 | 实例创建和销毁          | `__new__` `__init__` `__del__`                               |
 | 属性管理                | `__getattr__` `__getattribute__` `__setattr__` `__delattr__` `__dir__` |
 | 属性描述符              | `__get__` `__set__` `__delete__`                             |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
-|                         |                                                              |
+| 跟类相关的服务          | `__prepare__` `__instancecheck__` `__subclasscheck__`        |
 
 
 
@@ -145,23 +137,51 @@ class Vector:
   tree.function()
   ```
 
-- 
+- [属性描述符](https://blog.csdn.net/Leafage_M/article/details/54960432)：`__get__` `__set__` `__delete__`
 
+  ```python
+  class Descriptor(object):  
+      def __get__(self, obj, type=None):  
+              return 'get', self, obj, type  
+      def __set__(self, obj, val):  
+          print 'set', self, obj, val  
+      def __delete__(self, obj):  
+          print 'delete', self, obj 
+          
+  class T(object):  
+         d = Descriptor()  
+  
+  t = T()
+  
+  >>> t.d         #t.d，返回的实际是d.__get__(t, T)  
+  ('get', <__main__.Descriptor object at 0x00CD9450>, <__main__.T object at 0x00CD0E50>, <class '__main__.T'>)  
+  >>> T.d        #T.d，返回的实际是d.__get__(None, T)，所以obj的位置为None  
+  ('get', <__main__.Descriptor object at 0x00CD9450>, None, <class '__main__.T'>)  
+  >>> t.d = 'hello'   #在实例上对descriptor设置值。要注意的是，现在显示不是返回值，而是__set__方法中print语句输出的。  
+  set <__main__.Descriptor object at 0x00CD9450> <__main__.T object at 0x00CD0E50> hello  
+  >>> t.d         #可见，调用了Python调用了__set__方法，并没有改变t.d的值  
+  ('get', <__main__.Descriptor object at 0x00CD9450>, <__main__.T object at 0x00CD0E50>, <class '__main__.T'>)  
+  >>> T.d = 'hello'   #没有调用__set__方法  
+  >>> T.d                #确实改变了T.d的值  
+  'hello'  
+  >>> t.d  #t.d的值也变了，这可以理解，按我们上面说的属性查找策略，t.d是从T.__dict__中得到的T.__dict__['d']的值是'hello'，t.d当然也是'hello'  
+  'hello'
+  ```
 
+### 跟运算符相关的特殊方法
 
+| 类别               | 方法名和对应的运算符                                         |
+| ------------------ | ------------------------------------------------------------ |
+| 一元运算符         | `__neg__` ：- ， `__pos__` : +, `__abs__`: `abs()`           |
+| 众多比较运算符     | `__lt__` <、`__le__` <=、`__eq__ `==、`__ne__` !=、`__gt__` >、`__ge__` >= |
+| 算术运算符         | `__add__` +、`__sub__ `-、`__mul__` *、`__truediv__` /、`__floordiv__` //、`__mod__` %、`__divmod__` `__divmod()`、`__pow__` ** 或`pow()`、`__round__` `round()` |
+| 反向算是运算符     | `__radd__`、`__rsub__`、`__rmul__`、`__rtruediv__`、`__rfloordiv__`、`__rmod__`、`__rdivmod__` |
+| 增量赋值算术运算符 | `__iadd__`、`__isub__`、`__imul__`、`__itruediv__`、`__ifloordiv__`、`__imod__`、`__ipow__` |
 
+## 小结
 
-
-
-
-
-
-
-
-
-
-
-
+- 通过特殊方法，我们可以让自定义数据类型可以表现得和内置类型一样，从而使得代码更加pythonic。
+- Python 对象的一个基本要求就是它得有合理的字符串表示形式，我们可以通过 __repr__ 和 __str__ 来满足这个要求。前者方便我们调试和记录日志，后者则是给终端用户看的。这就是数据模型中存在特殊方法`__repr__` 和 `__str__` 的原因。
 
 
 
